@@ -51,19 +51,20 @@ int buttonState = 0, lastButtonState = HIGH, currentLED = 0;
 int redLedCount = 0, greenLedCount = 0;
 
 // BCD-Anzeige steuern
-void setBCDValue(int digit) {
-  digitalWrite(bcdA, digit & 0x1);
-  digitalWrite(bcdB, (digit >> 1) & 0x1);
-  digitalWrite(bcdC, (digit >> 2) & 0x1);
-  digitalWrite(bcdD, (digit >> 3) & 0x1);
+void setBCDValue(int digit) {  // nimmt eine Zahl (0-9) und wandelt sie in ein 4-Bit-BCD um
+  digitalWrite(bcdA, digit & 0x1);         // Bit0 (1)
+  digitalWrite(bcdB, (digit >> 1) & 0x1);  // Bit1 (2)
+  digitalWrite(bcdC, (digit >> 2) & 0x1);  // Bit2 (4)
+  digitalWrite(bcdD, (digit >> 3) & 0x1);  // Bit3 (8)
 }
 
 void displayDigit(int digit, int digitPin) {
-  setBCDValue(digit);
-  delayMicroseconds(1);
+  setBCDValue(digit);   // vorbereitet die gewünschte Zahl auf der 7-Segment-Anzeige 
+  delayMicroseconds(1);  // kleine Verzögerung um den Wert stabil zu setzen
   digitalWrite(digitPin, LOW);
 }
 
+// Anzeige ausschalten 
 void clearDisplay() {
   digitalWrite(D3, HIGH);
   digitalWrite(D4, HIGH);
@@ -77,6 +78,7 @@ void activateDemux(int index) {
   delayMicroseconds(50);
 }
 
+// Variablen initialisieren und serielle Kommunikation starten
 void setup() {
   pinMode(bcdA, OUTPUT);
   pinMode(bcdB, OUTPUT);
@@ -87,7 +89,7 @@ void setup() {
   pinMode(ledPin1, OUTPUT);
   pinMode(ledPin2, OUTPUT);
   pinMode(ledPin3, OUTPUT);
-  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(buttonPin, INPUT_PULLUP);  //Taster ist in Ruhezustand auf HIGH gesetzt
   
   pinMode(DEMUX_DATA1, OUTPUT);
   pinMode(DEMUX_DATA2, OUTPUT);
@@ -103,8 +105,8 @@ void setup() {
 
   sampling_period_us = round(1000000 * (1.0 / SAMPLING_FREQUENCY));
 
-  clearDisplay();
-  Serial.begin(9600);
+  clearDisplay();   // sicherstellt, dass die Anzeige leer ist
+  Serial.begin(9600);  // aktiviert die serielle Kommunikation
 }
 
 void loop() {
@@ -114,16 +116,16 @@ void loop() {
   // Potentiometer-Wert abtasten
   if (currentMillis - previousMillis >= sampleInterval) {
     previousMillis = currentMillis;
-    potentiometerValue = analogRead(potPin);
+    potentiometerValue = analogRead(potPin);  // ausliest den aktuellen Wert des Potentiometers 
     combinedRMS = potentiometerValue;
-    displayValue = map(combinedRMS, 0, 1023, 0, 99);
-    tens = displayValue / 10;
-    units = displayValue % 10;
+    displayValue = map(combinedRMS, 0, 1023, 0, 99);  // skaliert den Potentiometer-Wert auf einen Bereich von 0 bis 99
+    tens = displayValue / 10;  // berechnet der Zehnerstelle
+    units = displayValue % 10;  // berechnet der Einerstelle
   }
 
   // Multiplexing zwischen den Ziffern der Anzeige
-  if (currentMicros - lastMultiplexMicros >= multiplexInterval) {
-    lastMultiplexMicros = currentMicros;
+  if (currentMicros - lastMultiplexMicros >= multiplexInterval) {   // aktualisiert die Anzeige
+    lastMultiplexMicros = currentMicros;   // speichert den aktuellen Zeitpunkt
     clearDisplay();
     if (showingTens) {
       displayDigit(tens, D3);
