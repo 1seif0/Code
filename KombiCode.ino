@@ -10,10 +10,10 @@ int D4 = 7;  // Einerstelle
 
 // Potentiometer und LED Pins
 int potPin = A5;
-const int ledPin1 = A0;
-const int ledPin2 = A1;
-const int ledPin3 = A2;
-const int buttonPin = 13;
+const int ledPin1 = A0;  // Pin für LED 1
+const int ledPin2 = A1;  // Pin für LED 2
+const int ledPin3 = A2;  // Pin für LED 3
+const int buttonPin = 13;  // Pin für Taster
 
 // FFT und LED-Matrix Pins
 #define NUM_LEDS 8
@@ -47,7 +47,9 @@ double vReal_green[SAMPLES], vImag_green[SAMPLES];
 int potentiometerValue, combinedRMS, displayValue;
 int tens, units;
 bool showingTens = true;
-int buttonState = 0, lastButtonState = HIGH, currentLED = 0;
+int buttonState = 0;       // Variable, um den aktuellen Buttonzustand zu speichern
+int lastButtonState = 0;   // Variable, um den vorherigen Buttonzustand zu speichern
+int currentLED = 0;        // Verfolgt, welche LED aktiv ist (0 = alle aus, 1 = LED 1, 2 = LED 2, 3 = LED 3)
 int redLedCount = 0, greenLedCount = 0;
 
 // BCD-Anzeige steuern
@@ -86,6 +88,7 @@ void setup() {
   pinMode(bcdD, OUTPUT);
   pinMode(D3, OUTPUT);
   pinMode(D4, OUTPUT);
+  // die LED-Pins als Ausgänge setzen
   pinMode(ledPin1, OUTPUT);
   pinMode(ledPin2, OUTPUT);
   pinMode(ledPin3, OUTPUT);
@@ -106,7 +109,7 @@ void setup() {
   sampling_period_us = round(1000000 * (1.0 / SAMPLING_FREQUENCY));
 
   clearDisplay();   // sicherstellt, dass die Anzeige leer ist
-  Serial.begin(9600);  // aktiviert die serielle Kommunikation
+  Serial.begin(9600);  // aktiviert die serielle Kommunikation für Debugging
 }
 
 void loop() {
@@ -139,7 +142,7 @@ void loop() {
   int reading = digitalRead(buttonPin);
   if (reading == LOW && lastButtonState == HIGH && (currentMillis - lastButtonPress) > buttonDebounceInterval) {
     lastButtonPress = currentMillis;
-    currentLED = (currentLED + 1) % 4;
+    currentLED = (currentLED + 1) % 4;  // Zyklus durch 0, 1, 2, 3
   }
   lastButtonState = reading;
 
